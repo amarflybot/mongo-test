@@ -1,7 +1,13 @@
 package com.example;
 
+import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDBFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.actuate.autoconfigure.ExportMetricWriter;
+import org.springframework.boot.actuate.endpoint.MetricsEndpoint;
+import org.springframework.boot.actuate.endpoint.MetricsEndpointMetricReader;
+import org.springframework.boot.actuate.metrics.writer.GaugeWriter;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
@@ -40,9 +46,28 @@ public class MongoTestApplication {
 		return strings.get(random.nextInt(strings.size()));
 	}
 
-	static String getRandomNumber(){
-		List<String> strings = Arrays.asList("H1","H2","H3","H4","H5","H6");
+	static String getRandomNumber() {
+		List<String> strings = Arrays.asList("H1", "H2", "H3", "H4", "H5", "H6");
 		Random random = new Random();
 		return strings.get(random.nextInt(strings.size()));
+	}
+
+	@Bean
+	@ExportMetricWriter
+	GaugeWriter influxMetricsWriter() {
+		InfluxDB influxDB = InfluxDBFactory.connect( "http://192.168.2.7:8086",
+				"root",
+				"root");
+		String dbName = "myMetricsDB";	// the name of the datastore you choose
+		//influxDB.createDatabase( dbName);
+		InfluxDBMetricWriter.Builder builder = new InfluxDBMetricWriter.Builder(influxDB);
+		builder.databaseName( dbName);
+		builder.batchActions( 50);	// number of points for batch before data is sent to Influx
+		return builder.build();
+	}
+
+	@Bean
+	public MetricsEndpointMetricReader metricsEndpointMetricReader(MetricsEndpoint metricsEndpoint) {
+		return new MetricsEndpointMetricReader(metricsEndpoint);
 	}
 }
