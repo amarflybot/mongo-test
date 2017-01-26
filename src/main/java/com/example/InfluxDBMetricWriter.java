@@ -1,9 +1,8 @@
 package com.example;
 
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.apache.log4j.Logger;
 import org.influxdb.InfluxDB;
 import org.influxdb.dto.Point;
 import org.springframework.boot.actuate.metrics.Metric;
@@ -16,6 +15,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class InfluxDBMetricWriter implements GaugeWriter {
 
+    private static final Logger LOGGER = Logger.getLogger(InfluxDBMetricWriter.class);
     private static final String DEFAULT_DATABASE_NAME = "metrics";
     private static final int DEFAULT_BATCH_ACTIONS = 500;
     private static final int DEFAULT_FLUSH_DURATION = 30;
